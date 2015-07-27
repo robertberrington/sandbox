@@ -1,7 +1,6 @@
-# Project settings
+# Project settings - Part I
 PROJECT := PythonTemplateDemo
 PACKAGE := demo
-SOURCES := Makefile setup.py $(shell find $(PACKAGE) -name '*.py')
 EGG_INFO := $(subst -,_,$(PROJECT)).egg-info
 
 # Python settings
@@ -22,6 +21,7 @@ ifneq ($(findstring win32, $(PLATFORM)), )
 	SYS_VIRTUALENV := $(SYS_PYTHON_DIR)\\Scripts\\virtualenv.exe
 	# https://bugs.launchpad.net/virtualenv/+bug/449537
 	export TCL_LIBRARY=$(SYS_PYTHON_DIR)\\tcl\\tcl8.5
+	FIND := C:\\cygwin\\bin\\find.exe
 else
 	ifneq ($(findstring darwin, $(PLATFORM)), )
 		MAC := 1
@@ -34,6 +34,9 @@ else
 	endif
 	SYS_VIRTUALENV := virtualenv
 endif
+
+# Project settings - Part II
+SOURCES := Makefile setup.py $(shell $(FIND) $(PACKAGE) -name '*.py')
 
 # virtualenv paths
 ENV := env
@@ -115,7 +118,7 @@ depends-dev: env Makefile $(DEPENDS_DEV_FLAG)
 $(DEPENDS_DEV_FLAG): Makefile
 	$(PIP) install --upgrade pip pep8radius pygments docutils pdoc wheel readme sniffer
 ifdef WINDOWS
-	$(PIP) install --upgrade pywin32
+	$(EASY_INSTALL) http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download
 else ifdef MAC
 	$(PIP) install --upgrade pync MacFSEvents
 else ifdef LINUX
@@ -131,11 +134,11 @@ doc: readme verify-readme apidocs uml
 .PHONY: readme
 readme: depends-dev README-github.html README-pypi.html
 README-github.html: README.md
-	pandoc -f markdown_github -t html -o README-github.html README.md
+	# pandoc -f markdown_github -t html -o README-github.html README.md
 README-pypi.html: README.rst
-	$(RST2HTML) README.rst README-pypi.html
+	# $(RST2HTML) README.rst README-pypi.html
 README.rst: README.md
-	pandoc -f markdown_github -t rst -o README.rst README.md
+	# pandoc -f markdown_github -t rst -o README.rst README.md
 
 .PHONY: verify-readme
 verify-readme: $(DOCS_FLAG)
@@ -252,8 +255,8 @@ clean-all: clean clean-env .clean-workspace
 
 .PHONY: .clean-build
 .clean-build:
-	find $(PACKAGE) -name '*.pyc' -delete
-	find $(PACKAGE) -name '__pycache__' -delete
+	$(FIND) $(PACKAGE) -name '*.pyc' -delete
+	$(FIND) $(PACKAGE) -name '__pycache__' -delete
 	rm -rf $(EGG_INFO)
 
 .PHONY: .clean-doc
