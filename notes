@@ -1,0 +1,6 @@
+cd usr/lib/python2.7
+python -i
+import py_compile
+py_compile.compile(file='site.py',cfile='site.pyc')
+exit()
+rm site.pyo
